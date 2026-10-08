@@ -54,11 +54,18 @@ Key properties:
 
 ## Quick start
 
-### Windows (one-click)
+### Windows — single-file exe (no Python needed)
 
-Double-click `run_webapp.bat`. It detects a suitable Python (3.10+), creates a
-local `.venv`, installs the dependencies and starts the server; the browser
-opens automatically.
+Grab `CrystalStack.exe` from the repository root, copy it anywhere, and
+double-click it. It bundles Python, Flask, NumPy and SciPy, so the target
+machine needs nothing installed. The browser opens automatically and generated
+structures appear in an `outputs/` folder next to the exe.
+
+### Windows — from source (one-click)
+
+Double-click `run_webapp.bat` inside `crystalstack/`. It detects a suitable
+Python (3.10+), creates a local `.venv`, installs the dependencies and starts
+the server; the browser opens automatically.
 
 ### Any platform
 
@@ -78,7 +85,28 @@ is taken).
 2. **Choose** the stacking modes and adjust parameters if needed
    (layer gap, in-plane offset); for multilayer inputs an extracted
    `monolayer.cif` can be requested as well.
-3. **Download** the generated CIF files, individually or bundled as a ZIP.
+3. **Read the summary table** — it is collapsed by default; click
+   *Stacking results table* to expand it.
+4. **Download** the generated CIF files, individually or bundled as a ZIP
+   (`Download all (ZIP)`, at the foot of the page).
+
+## Building the exe yourself
+
+```bat
+cd crystalstack
+build_exe.bat
+```
+
+Requires Python 3.10+ on the build machine only; the produced
+`dist/CrystalStack.exe` runs anywhere. The script creates a throwaway
+`build_env/` virtual environment with the pinned versions in
+`requirements-build.txt`, so unrelated packages installed alongside the project
+cannot end up inside the exe. Use `build_exe.bat --clean` to keep the build
+intermediates for a faster rebuild.
+
+First launch takes 10–20 seconds: a one-file exe unpacks itself to a temporary
+directory before starting. Some antivirus products flag PyInstaller output and
+need an exclusion.
 
 ## Examples
 
@@ -91,6 +119,7 @@ is taken).
 | `CTF-1_monolayer.cif` | CTF-1 monolayer, hexagonal |
 | `Pc-PBBA_monolayer.cif` | Pc-PBBA monolayer, square |
 | `CuPc_monolayer.cif` | first layer extracted from the rotated reference bilayer; run the rotated mode on it to regenerate that bilayer |
+| `ettb-aa.cif` | reported sql framework (Cu2-paddlewheel + tetratopic linker); four-fold non-primitive cell used to demonstrate the node-on-node diagnostic |
 
 ## Reference data
 
@@ -102,32 +131,46 @@ regression tests compare against.
 ## Repository layout
 
 ```
-crystalstack/
-├── app.py                 Flask application (UI, upload, run management)
-├── layer_stacking.py      core stacking engine
-├── stacking_rules.py      automatic offset selection and provenance
-├── cif_io.py              CIF reader/writer (P1, symmetry expansion)
-├── benchmark_scaling.py   timing benchmark
-├── test_layer_stacking.py regression suite (135 checks)
-├── smoke_test_web.py      end-to-end web smoke test
-├── run_webapp.bat         Windows one-click launcher
-├── requirements.txt
-├── templates/  static/    web interface
-├── reference/             DFT reference structures (CIF)
-└── examples/              sample monolayer inputs (CIF)
+CrystalStack/
+├── CrystalStack.exe       prebuilt single-file executable (no Python needed)
+├── crystalstack/          source tree
+│   ├── app.py                 Flask application (UI, upload, run management)
+│   ├── layer_stacking.py      core stacking engine
+│   ├── stacking_rules.py      automatic offset selection and provenance
+│   ├── cif_io.py              CIF reader/writer (P1, symmetry expansion)
+│   ├── benchmark_scaling.py   timing benchmark
+│   ├── test_layer_stacking.py regression suite (135 checks)
+│   ├── smoke_test_web.py      end-to-end web smoke test
+│   ├── build_exe.py           PyInstaller build driver
+│   ├── build_exe.bat          one-click exe build
+│   ├── run_webapp.bat         Windows one-click launcher (from source)
+│   ├── requirements.txt       runtime dependencies
+│   ├── requirements-build.txt pinned build-time dependencies
+│   ├── templates/  static/    web interface
+│   ├── reference/             DFT reference structures (CIF)
+│   └── examples/              sample monolayer inputs (CIF)
+├── crystalstack.zip      source archive of the folder above
+├── README.md  README.docx
+└── LICENSE
 ```
 
 ## Requirements
 
 - Python ≥ 3.10
 - numpy, scipy, Flask (see `requirements.txt`)
+- *Running* `CrystalStack.exe` needs neither Python nor these packages.
 
 ## Tests
 
 ```bash
+cd crystalstack
 python test_layer_stacking.py    # 135 checks, engine + rules + CIF I/O
 python smoke_test_web.py         # end-to-end test against the Flask test client
 ```
+
+## License
+
+MIT — see [LICENSE](LICENSE).
 
 ## Citation
 
